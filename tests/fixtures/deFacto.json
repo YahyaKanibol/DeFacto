@@ -1,0 +1,22 @@
+{
+	"url": "https://www.defacto.com.tr/",
+	"loginUrl": "",
+	"baseUrl": "",
+	"username": "",
+	"password": "",
+	"Parameters": {
+		"DB_SERVER": "",
+		"DB_SERVICENAME": "",
+		"DB_USERNAME": "",
+		"DB_PASSWORD": ""
+	},
+	"TestData": {
+		"KrediKarti": {
+			"KartNo": "5517045264099243",
+			"kartAdSoyAd": "MECNUN CINAR",
+			"ay": "02",
+			"yil": "29",
+			"Cvv": "047"
+		}
+	}
+}

@@ -1,0 +1,25 @@
+{
+    "json": {
+      "enabled": false,
+      "output": "jsonlogs/log.json",
+      "formatter": "cucumber-json-formatter"
+    },
+    "messages": {
+      "enabled": false,
+      "output": "jsonlogs/messages.ndjson"
+    },
+    "html": {
+      "enabled": false
+    },
+    "nonGlobalStepDefinitions": true,
+    "cucumber.features": [
+      "tests/features/*.feature",
+      "*/tests/features/*.feature",
+      "*/tests/features/*/*.feature",
+      "tests/features/*/*.feature"
+    ], 
+    "cucumber.glue": [
+      "tests/steps/*.js",
+      "*/tests/steps/*.js"
+    ]
+}
