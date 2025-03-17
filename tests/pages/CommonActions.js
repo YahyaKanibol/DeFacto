@@ -1263,6 +1263,166 @@ class CommonActions {
         const expectedText = `${sehir} / ${ilce} Mağazalar`
         await this.appearObjectTextOnTheObject('STORES_CITY_TITLE', expectedText)
     }
+
+    async navigateBack() {
+        await this.waitForLoadingMask()
+        
+        try {
+            // Geri dönüş işlemini başlat
+            const navigationPromise = this.context.goBack()
+            
+            // Sayfa yükleme durumlarını bekle
+            await Promise.all([
+                navigationPromise,
+                this.context.waitForLoadState('domcontentloaded'),
+                this.context.waitForLoadState('load'),
+                this.context.waitForLoadState('networkidle')
+            ])
+            
+            // Kısa bir bekleme ekle
+            await this.waitSecond(1)
+            
+            // Son bir kez daha yükleme durumunu kontrol et
+            await this.waitForLoadingMask()
+            
+        } catch (error) {
+            console.error('Geri dönüş sırasında hata:', error)
+            
+            // Hata durumunda sayfanın yüklenmesini bekle
+            await this.context.waitForLoadState('domcontentloaded')
+            await this.context.waitForLoadState('load')
+            await this.waitForLoadingMask()
+        }
+    }
+    async appearTextOnTheScreen(text) {
+        // await this.waitForLoadingMask()
+        const element = `(//*[contains(.,"${text}")])[last()]`
+        await this.context.locator(element).waitFor({ state: 'visible' })
+    }
+    async appearTextDataOnTheScreen(data, value) {
+        await this.waitForLoadingMask()
+
+        // key değerini '+' ile bölüyoruz
+        const keyParts = value.split('+')
+        const firstPart = keyParts[0]
+        const secondPart = keyParts[1]
+
+        let text = data == 'Temp Data' ? await CommonUtil.readTempData(firstPart) : await Constants.getTestData(data, firstPart)
+
+        // İkinci parçayı text ile birleştiriyoruz
+        const newText = `${text}${secondPart ? secondPart.trim() : ''}`.trim()
+        console.log(newText, ' textinin gorunur oldugu kontrol ediliyor')
+
+        const element = `(//*[contains(text(),"${newText}")])[last()]`
+        await this.context.locator(element).waitFor({ state: 'visible' })
+    }
+    async clickElementByDataValue(path, data, key) {
+        await this.waitForLoadingMask()
+        let text = data == 'Temp Data' ? await CommonUtil.readTempData(key) : await Constants.getTestData(data, key)
+        const element = await this.getXpath(path, text)
+        await this._click(element)
+    }
+    async dontAppearTextOnTheScreen(text) {
+        await this.waitForLoadingMask()
+        const element = `(//*[contains(text(),"${text}")])[last()]`
+        await this.context.locator(element).waitFor({ state: 'hidden' })
+    }
+    async dontAppearTextDataOnTheScreen(data, value) {
+        await this.waitForLoadingMask()
+        const dataElement = data == 'Temp Data' ? await CommonUtil.readTempData(value) : await Constants.getTestData(data, value)
+        const element = `(//*[contains(text(),"${dataElement}")])[last()]`
+        await this.context.locator(element).waitFor({ state: 'hidden' })
+    }
+    async appearTextOnTheScreenWithIndex(text, index) {
+        await this.waitForLoadingMask()
+        const element = `(//*[contains(text(),"${text}")])[${index}]`
+        await this.context.locator(element).waitFor({ state: 'visible' })
+    }
+    async clickDataElementIfExist(data, value) {
+        await this.waitForLoadingMask()
+        const dataElement = data == 'Temp Data' ? await CommonUtil.readTempData(value) : await Constants.getTestData(data, value)
+        const locator = `(//*[text()="${dataElement}"])[last()]`
+
+        await this._waitForAndTakeAction(locator, async () => {
+            await this._click(locator)
+        })
+    }
+    async dblClickDataElement(data, value) {
+        await this.waitForLoadingMask()
+        const dataElement = data == 'Temp Data' ? await CommonUtil.readTempData(value) : await Constants.getTestData(data, value)
+        const element = `(//*[text()="${dataElement}"])[last()]`
+        console.log(element + ' elementine double click yapildi')
+        await this._dblclick(element)
+    }
+    async rightClickDataElement(data, value) {
+        await this.waitForLoadingMask()
+        const dataElement = data == 'Temp Data' ? await CommonUtil.readTempData(value) : await Constants.getTestData(data, value)
+        const element = `(//*[text()="${dataElement}"])[last()]`
+        await this._rightClick(element)
+    }
+
+    async clickDataElement(data, value, index = 'last()') {
+        await this.waitForLoadingMask()
+        const dataElement = data == 'Temp Data' ? await CommonUtil.readTempData(value) : await Constants.getTestData(data, value)
+        const element = `(//*[text()="${dataElement}"])[${index}]`
+        console.log(element)
+        await this._click(element)
+    }
+    async butonaTiklaTekilIslevWaitsiz(button) {
+        console.log(button + ' butonuna tiklandi')
+        if (process.env.ENVIRONMENT == 'elazig' || process.env.ENVIRONMENT == 'eskisehir') {
+            if (button == 'Görüntüleme') {
+                button = 'Radyoloji'
+            }
+        }
+        let controlIndexes = ['last()', 'last()-1', '1']
+        // const timeout = 1000
+        let status = false
+        for (let index of controlIndexes) {
+            let buttonElement = this.projectName == 'Konvansiyonel' ? await this.getXpath('BUTTON', button, index) : await this.getXpath('MODERN_BUTTON', button, index)
+            status = await this._waitForAndTakeAction(buttonElement, async () => {
+                await this._click(buttonElement)
+            })
+            if (status) {
+                break
+            }
+        }
+    }
+    async butonaCiftTiklaTekilIslev(button) {
+        console.log(button + ' butonuna tiklandi');
+        await this.waitForLoadingMask();
+        if (process.env.ENVIRONMENT === 'elazig' || process.env.ENVIRONMENT === 'eskisehir') {
+            if (button === 'Görüntüleme') {
+                button = 'Radyoloji';
+            }
+        }
+        const controlIndexes = ['last()', 'last()-1', '1'];
+        const globalTimeout = (parseInt(process.env.WAIT_TIMEOUT, 10) || 1) * 60000;
+        const deadline = Date.now() + globalTimeout;
+        let buttonFound = false;
+
+        // Global timeout süresi dolana kadar indexleri sürekli kontrol et
+        while (Date.now() < deadline && !buttonFound) {
+            for (const index of controlIndexes) {
+                const buttonElement = this.projectName === 'Konvansiyonel'
+                    ? await this.getXpath('BUTTON', button, index)
+                    : await this.getXpath('MODERN_BUTTON', button, index);
+                const el = this.context.locator(buttonElement);
+                if (await el.isVisible().catch(() => false)) {
+                    await this._dblclick(buttonElement);
+                    buttonFound = true;
+                    break;
+                }
+            }
+            if (!buttonFound) {
+                await this.context.waitForTimeout(200);
+            }
+        }
+        if (!buttonFound) {
+            throw new Error(`Element ${button} herhangi bir indexte bulunamadı`);
+        }
+        await this.waitForLoadingMask();
+    }
 }
 
 module.exports = new CommonActions()

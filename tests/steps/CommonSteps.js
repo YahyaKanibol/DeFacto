@@ -20,7 +20,7 @@ Then('Calisilacak basligi {string} olarak ayarla', async (title) => {
     await CommonActions.setContextAsTitle(title)
 })
 
-Then('Yuklenene kadar bekle', async () => {
+Then('Sayfa yuklenene kadar bekle', async () => {
     await CommonActions.waitForLoadingMask()
     await CommonActions.waitSecond(0.3)
     await CommonActions.waitForLoadingMask()
@@ -146,9 +146,6 @@ Then('{string} icerisinden {string} degeri varsa tiklanir', async (data, value) 
     await CommonActions.clickDataElementIfExist(data, value)
 })
 
-Then('{string} icerisinden {string} degeri varsa cift tiklanir', async (data, value) => {
-    await CommonActions.dblClickDataElementIfExist(data, value)
-})
 
 Then('{string} alanina {string} yazilir', async (element, text) => {
     await CommonActions.sendType(element, text)
@@ -270,9 +267,6 @@ Then('{string} icerisinden {string} degerinin gorunur oldugu kontrol edilir', as
     await CommonActions.appearTextDataOnTheScreen(data, value)
 })
 
-Then('{string} icerisinden {string} degerinin renginin {string} oldugu kontrol edilir', async (data, value, color) => {
-    await CommonActions.appearTextDataOnTheScreenColor(data, value, color)
-})
 
 Then('{string} icerisinden {string} degerinin gorunur olmadigi kontrol edilir', async (data, value) => {
     await CommonActions.dontAppearTextDataOnTheScreen(data, value)
@@ -515,4 +509,8 @@ Then('Butonlardan {string} secilir ve kontrol edilir', async (sehir) => {
 
 Then('Combo kismindan {string} secilir ve {string} secilerek kontrol yapilir', async (sehir, ilce) => {
     await CommonActions.selectCityAndDistrictAndVerify(sehir, ilce)
+})
+
+Then('Bir onceki sayfaya geri donulur', async () => {
+    await CommonActions.navigateBack()
 })
