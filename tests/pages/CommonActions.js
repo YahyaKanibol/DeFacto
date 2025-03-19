@@ -325,7 +325,21 @@ class CommonActions {
             console.log('element not exist')
         }
     }
+ // Belirli bir elementi kaydırma
+ async scrollElement(xpathKey, scrollAmount) {
+    await this.waitForLoadingMask();
+    const elementLocator = await this.getXpath('', xpathKey, 'last()'); 
+    const element = await this.context.locator(elementLocator, { timeout: 3000 });
 
+    if (await element.isVisible()) {
+        await element.evaluate((el, scrollAmount) => {
+            el.scrollTop += scrollAmount;
+        }, scrollAmount);
+        console.log(`Element içinde ${scrollAmount} piksel aşağı kaydırıldı.`);
+    } else {
+        console.log("Element bulunamadı.");
+    }
+}
     async isButtonActive(button) {
         await this.waitForLoadingMask()
 

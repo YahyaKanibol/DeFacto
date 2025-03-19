@@ -339,6 +339,9 @@ Then('{string} elementi uzerinde {string} yazan texte tiklanir', async (xpathKey
 Then('{string} elementi uzerinde {string} yazan texte cift tiklanir', async (xpathKey, key) => {
     await CommonActions.dblClickByTextOnTheObject(xpathKey, key)
 })
+Then('{string} elementi {int} piksel asagi kaydirilir', async (xpathKey, scrollAmount) => {
+    await CommonActions.scrollElement(xpathKey, scrollAmount);
+});
 
 Then('{string} elementi uzerinde {string} icerisinden {string} yazan texte cift tiklanir', async (xpathKey, data, key) => {
     await CommonActions.dblClickDataByTextOnTheObject(xpathKey, data, key)
