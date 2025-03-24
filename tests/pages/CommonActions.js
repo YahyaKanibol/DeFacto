@@ -1437,6 +1437,50 @@ class CommonActions {
         }
         await this.waitForLoadingMask();
     }
+    // CommonActions.js
+  
+    async hoverOverElement(xpathKey) {
+     
+        await this.waitForLoadingMask();  
+        
+        const elementLocator = await this.getXpath(xpathKey);  
+        
+        console.log(`Bulunan XPath: ${elementLocator}`);  
+        
+        if (!elementLocator) {
+            throw new Error(`XPath değeri bulunamadı: ${xpathKey}`);
+        }
+        
+        const element = this.context.locator(`xpath=${elementLocator}`);
+        
+        await this.context.waitForSelector(`xpath=${elementLocator}`, { timeout: 5000 });
+        await element.hover();
+    }
+
+
+    async checkElementText(jsonKey, expectedText) {
+        await this.waitForLoadingMask(); // Yüklenme maskesi varsa bekle
+    
+        // JSON'dan XPath'i al
+        const xpathValue = await this.getXpath(jsonKey); 
+    
+        if (!xpathValue) {
+            throw new Error(`JSON dosyasında "${jsonKey}" anahtarı bulunamadı!`);
+        }
+    
+        // Elementi bul ve içindeki metni al
+        const element = this.context.locator(`xpath=${xpathValue}`);
+        await element.waitFor({ state: 'visible', timeout: 5000 }); // Elementin görünmesini bekle
+        const actualText = (await element.innerText()).trim();
+    
+        // Metni doğrula
+        expect(actualText).toBe(expectedText);
+    
+        console.log(`✅ "${jsonKey}" elementi doğrulandı. İçerik: "${actualText}"`);
+    }
+    
+    
+
 }
 
 module.exports = new CommonActions()
