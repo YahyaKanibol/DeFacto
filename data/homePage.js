@@ -137,23 +137,22 @@ class homePage {
         GENISLETILMIS_HEADER_SEARCH_INPUT:"//input[@id='header-search-autocomplete']",
         GENISLETILMIS_HEADER_SEARCH_ICON: "//header/div[3]/div/div[1]/div/form/span[1]",
         ARAMA_LISTELELENEN_ILK_URUN:"//div[@id='product-fill']/div/div[1]/div",
-        FILTRELER_ERKEK:"//div[@id='catalog-filter__nav']/ul/li[1]/ul/li/ul/li[1]/div/label",
-        FILTRELER_CINSIYET:"//div[@id='catalog-filter__nav']/ul/li[1]/div/div[1]",
-        FILTRELER_KATEGORI_ILK_KATEGORI:"//div[@id='catalog-filter__nav']/ul/li[2]/ul/li[2]/ul/li[1]/div/label",
-        FILTRELER_KATEGORI:"//div[@id='catalog-filter__nav']/ul/li[2]/div/div[1]",
-        FILTRELER_BEDEN:"//div[@id='catalog-filter__nav']/ul/li[3]/div/div[1]",
-        FILTRELER_BEDEN_XL:"//div[@id='catalog-filter__nav']/ul/li[3]/ul/li[2]/ul/li[5]/div/label",
-
-
-
-      
-
-
-
-
-
+        
+        ANASAYFA_HEADER_KADIN_MENU: "//a[@title='kadın' and @name='kadın' and contains(@class, 'menu__main--item-link')]",
+        ANASAYFA_HEADER_KADIN_MENU_GIYIM: "//header/div[2]/nav/ul[1]/li[1]/div/div/div[1]/ul/li[1]/a/i",
+        ANASAYFA_HEADER_KADIN_GIYIM_HEPSINI_GOSTER:"//header/div[2]/nav/ul[1]/li[1]/div/div/div[2]/ul/li[2]/a/div[1]",
+        PLP_FAVORILERE_EKLE:"//div[@id='product-fill']/div/div[1]/div/div[1]/div[1]",
+        KVKK_TUMUNE_IZIN_VER:"//div[@id='kvkk_notification']/div/div[2]/a[2]",
+        ANASAYFA_HEADER_ERKEK_MENU:"//header/div[2]/nav/ul[1]/li[2]/a",  
+        ANASAYFA_HEADER_MENU_ERKEK_GIYIM:"//header/div[2]/nav/ul[1]/li[2]/div/div/div[1]/ul/li[1]/a",
+        ANASAYFA_HEADER_ERKEK_PANTOLON:"//header/div[2]/nav/ul[1]/li[2]/div/div/div[2]/ul/li[35]/a/div[2]",
+       
+        HEADER_KATEGORILER:"//header/div[2]/nav",
+    
+        FAVORILER:"//header/div[2]/div[3]/div[3]/a",
         SEHIR_DROPDOWN: "//div[@id='StoreCities']/div[@class='dropdown-search']",
         ILCE_DROPDOWN: "//div[@id='StoreCounties']/div[@class='dropdown-search']/div[@class='dropdown-search__selected']",
+
         HARITA:"//*[@id='googleMapsCanvas']"
     }
   

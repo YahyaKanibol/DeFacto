@@ -517,3 +517,19 @@ Then('Combo kismindan {string} secilir ve {string} secilerek kontrol yapilir', a
 Then('Bir onceki sayfaya geri donulur', async () => {
     await CommonActions.navigateBack()
 })
+
+Then('{string} elementi uzerine imleç getirilir', async (xpathKey) => {
+   
+    console.log("JSON'dan gelen XPath: ", xpathKey);
+    
+   
+    await CommonActions.hoverOverElement(xpathKey);
+})
+
+Then('{string} alaninin text degerinin {string} oldugu kontrol edilir', async (jsonKey, expectedText) => {
+    await CommonActions.checkElementText(jsonKey, expectedText);
+});
+
+
+
+
