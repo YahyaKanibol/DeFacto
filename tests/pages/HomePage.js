@@ -11,6 +11,50 @@ class HomePage {
         await page.goto(Constants.getUrl());
     }
 
+    async handleAllPopups() {
+        // KVKK Pop-up kontrolü
+        try {
+            const kvkkPopup = await page.waitForSelector('#kvkk_notification >> div >> div:nth-child(2) >> a:nth-child(2)', {
+                state: 'visible',
+                timeout: 5000
+            });
+            if (kvkkPopup) {
+                await kvkkPopup.evaluate(node => node.click());
+                console.log('KVKK pop-up kapatıldı');
+            }
+        } catch (e) {
+            console.log('KVKK pop-up görünmedi');
+        }
+
+        // Bildirim Pop-up kontrolü
+        try {
+            const notificationPopup = await page.waitForSelector('#ins-wrap-button-1580496494', {
+                state: 'visible',
+                timeout: 5000
+            });
+            if (notificationPopup) {
+                await notificationPopup.click();
+                console.log('Bildirim pop-up kapatıldı');
+            }
+        } catch (e) {
+            console.log('Bildirim pop-up görünmedi');
+        }
+
+        // Üyelik Pop-up kontrolü
+        try {
+            const memberPopup = await page.waitForSelector('#ins-slide-page-0', {
+                state: 'visible',
+                timeout: 5000
+            });
+            if (memberPopup) {
+                const closeButton = await page.waitForSelector('#close-button-1454703513202 >> span');
+                await closeButton.evaluate(node => node.click());
+                console.log('Üyelik pop-up kapatıldı');
+            }
+        } catch (e) {
+            console.log('Üyelik pop-up görünmedi');
+        }
+    }
 
     async _loginBase(user, pw){
         await CommonActions.waitForLoadingMask();

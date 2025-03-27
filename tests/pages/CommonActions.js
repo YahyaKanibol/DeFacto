@@ -930,53 +930,56 @@ class CommonActions {
             }
         }
     }
-
-    async setPassengerCount(sayi) {
+    async hoverOver(pathHover) {
         await this.waitForLoadingMask()
-        // Artı butonuna istenen sayı kadar tıkla
-        const artiButon = await this.getXpath('YOLCU_SAYISI_ARTI')
-        for(let i = 1; i < parseInt(sayi); i++) { // Default 1 olduğu için i=1'den başlıyoruz
-            await this._click(artiButon)
-            await this.waitSecond(0.2) // Her tıklama arasında kısa bir bekleme
-        }
-        
-        // Tamam butonuna tıkla
-        const tamamButon = "(//button[@class='PassengerSelect__box__button tstnm_fly_search_tab_1_passenger_confirm js-passenger-close'])[1]"
-        await this._click(tamamButon)
-        
+        const hoverElement = await this.getXpath(pathHover)
+        await this.context.locator(hoverElement).hover()
+    }
+
+    async hoverAndWaitAndClickElement(pathHover, pathClick) {
+        await this.waitForLoadingMask()
+        const hoverElement = await this.getXpath(pathHover)
+        const clickElement = await this.getXpath(pathClick)
+        await this.context.hover(hoverElement)
+        await this.context.waitForSelector(clickElement, { visible: true, timeout: 5000 })
+        await this.context.click(clickElement)
+    }
+
+    async hoverAndWaitAndClickElementWithText(pathHover, textClick) {
+        await this.waitForLoadingMask()
+        const hoverElement = await this.getXpath(pathHover)
+        const clickElement = `//*[contains(text(),'${textClick}')]`
+        await this.context.hover(hoverElement)
+        await this.context.waitForSelector(clickElement, { visible: true, timeout: 5000 })
+        await this.context.click(clickElement)
+    }
+
+    async clear(path) {
+        const element = (await this.getXpath(path)) !== undefined ? await this.getXpath(path) : await this.getXpath('MODERNIZASYON_INPUT', path)
+        await this.context.locator(element).clear()
+    }
+
+    async sendKeyboardActionToElement(path, key) {
+        await this.waitForLoadingMask()
+        // const element = await this.getXpath(path)
+        const element = (await this.getXpath(path)) !== undefined ? await this.getXpath(path) : await this.getXpath('MODERNIZASYON_INPUT', path)
+        await this.context.locator(element).waitFor({ visible: true })
+        await this.context.locator(element).press(key, { force: true })
         await this.waitForLoadingMask()
     }
 
-    async selectCheapestFlight() {
+    async sendKeyboardAction(key) {
         await this.waitForLoadingMask()
-        
-        // Tüm bilet fiyatlarını topla
-        const prices = await this.context.$$('.price-text, .price-text-promotion')
-        let lowestPrice = Number.MAX_VALUE
-        let cheapestTicketButton = null
-        
-        // Her bir fiyatı kontrol et
-        for (const priceElement of prices) {
-            // Fiyat metnini al ve sayıya çevir
-            const priceText = await priceElement.textContent()
-            const price = parseFloat(priceText.replace(/[^0-9,]/g, '').replace(',', '.'))
-            
-            if (price < lowestPrice) {
-                lowestPrice = price
-                // En ucuz biletin butonunu bul
-                cheapestTicketButton = await priceElement.$('xpath=./ancestor::button[contains(@class, "item-content")]')
-            }
-        }
-        
-        if (cheapestTicketButton) {
-            console.log(`En düşük fiyatlı bilet seçiliyor: ${lowestPrice} TL`)
-            await cheapestTicketButton.click()
-        } else {
-            throw new Error('Uygun bilet bulunamadı!')
-        }
-        
+        await global.page.keyboard.press(key)
         await this.waitForLoadingMask()
     }
+
+    async sendKeyboardKey(text) {
+        await this.waitForLoadingMask()
+        await this.context.keyboard.type(text, { force: true })
+        await this.waitForLoadingMask()
+    }
+
 
     async retryClickButtonIfTextExists(text, button, retryCount = 15) {
         await this.waitForLoadingMask()
@@ -1309,9 +1312,30 @@ class CommonActions {
         }
     }
     async appearTextOnTheScreen(text) {
-        // await this.waitForLoadingMask()
-        const element = `(//*[contains(.,"${text}")])[last()]`
-        await this.context.locator(element).waitFor({ state: 'visible' })
+        
+        // Önce ürün başlığında ara
+        const productTitleXPath = `//h3[contains(@class, 'product-card__title')]//span[normalize-space(text())="${text}"]`
+        const generalXPath = `(//*[contains(.,"${text}")])[1]`
+        
+        try {
+            // İlk olarak ürün başlığında aramayı dene
+            const productTitleElement = this.context.locator(productTitleXPath)
+            const isProductTitleVisible = await productTitleElement.isVisible().catch(() => false)
+            
+            if (isProductTitleVisible) {
+                await productTitleElement.waitFor({ state: 'visible' })
+                console.log(`"${text}" ürün başlığı görünür durumda`)
+                return
+            }
+            
+            // Ürün başlığında bulunamazsa genel aramayı dene
+            const generalElement = this.context.locator(generalXPath)
+            await generalElement.waitFor({ state: 'visible' })
+            console.log(`"${text}" metni sayfada görünür durumda`)
+            
+        } catch (error) {
+            throw new Error(`"${text}" metni sayfada bulunamadı veya görünür değil`)
+        }
     }
     async appearTextDataOnTheScreen(data, value) {
         await this.waitForLoadingMask()
@@ -1321,14 +1345,27 @@ class CommonActions {
         const firstPart = keyParts[0]
         const secondPart = keyParts[1]
 
-        let text = data == 'Temp Data' ? await CommonUtil.readTempData(firstPart) : await Constants.getTestData(data, firstPart)
+        // data 'Temp Data' ise CommonUtil.readTempData kullan, değilse Constants.getTestData kullan
+        let text
+        try {
+            text = data === 'Temp Data' 
+                ? await CommonUtil.readTempData(firstPart) 
+                : await Constants.getTestData(data, firstPart)
 
-        // İkinci parçayı text ile birleştiriyoruz
-        const newText = `${text}${secondPart ? secondPart.trim() : ''}`.trim()
-        console.log(newText, ' textinin gorunur oldugu kontrol ediliyor')
+            if (!text) {
+                throw new Error(`"${firstPart}" değeri ${data}'da bulunamadı`)
+            }
 
-        const element = `(//*[contains(text(),"${newText}")])[last()]`
-        await this.context.locator(element).waitFor({ state: 'visible' })
+            // İkinci parçayı text ile birleştiriyoruz
+            const newText = `${text}${secondPart ? secondPart.trim() : ''}`.trim()
+            console.log(`"${newText}" textinin gorunur oldugu kontrol ediliyor`)
+
+            const element = `(//*[.="${newText}"])[1]`
+            await this.context.locator(element).waitFor({ state: 'visible' })
+        } catch (error) {
+            console.error(`Hata: ${error.message}`)
+            throw error
+        }
     }
     async clickElementByDataValue(path, data, key) {
         await this.waitForLoadingMask()
@@ -1479,8 +1516,199 @@ class CommonActions {
         console.log(`✅ "${jsonKey}" elementi doğrulandı. İçerik: "${actualText}"`);
     }
     
-    
+    async clickElementAndSaveName(path, key) {
+        await this.waitForLoadingMask()
+        const element = await this.getXpath(path)
+        
+        // Ürün başlığını içeren elementi bul ve metnini al
+        const productNameElement = this.context.locator(`${element}//h3[@class='product-card__title']//span`)
+        const productName = await productNameElement.textContent()
+        
+        // Ürün adını temp data'ya kaydet
+        await CommonUtil.writeTempData(key, productName)
+        console.log(`Ürün adı "${productName}" temp data'ya "${key}" olarak kaydedildi`)
+        
+        // Elemente tıkla
+        await this._click(element)
+        await this.waitForLoadingMask()
+    }
+    async navigateToSubCategory(mainCategory, subCategory) {
+        await this.waitForLoadingMask();
+        
+        // Ana kategori menüsünün üzerine gel
+        const mainMenuLocator = `//a[contains(@class, 'menu__main--item-link-1') and normalize-space(.)='${mainCategory}']`;
+        await this.context.locator(mainMenuLocator).first().waitFor({state: 'visible'});
+        await this.context.hover(mainMenuLocator);
+        await this.waitSecond(1);
+        
+        // Alt kategoriye tıkla - daha spesifik bir seçici kullanıyoruz
+        const subMenuLocator = `//a[contains(@class, 'menu__main--item-link') and (
+            translate(@title, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')=translate('${subCategory}', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz') 
+            or 
+            .//div[contains(@class, 'menu__main--item-link-text') and normalize-space(text())='${subCategory}']
+        )]`;
+        await this.context.locator(subMenuLocator).first().waitFor({state: 'visible'});
+        await this._click(subMenuLocator);
+        
+        await this.context.waitForLoadState('networkidle');
+    }
 
+    async navigateToSubSubCategory(mainCategory, subCategory) {
+        await this.waitForLoadingMask();
+        
+        // Ana kategori menüsünün üzerine gel
+        const mainMenuLocator = `//a[contains(@class, 'menu__main--item-link-1') and normalize-space(.)='${mainCategory}']`;
+        await this.context.locator(mainMenuLocator).first().waitFor({state: 'visible'});
+        await this.context.hover(mainMenuLocator);
+        await this.waitSecond(1);
+        
+        // Alt kategori menüsünün üzerine gel - daha spesifik bir seçici kullanıyoruz
+        const subMenuLocator = `//a[contains(@class, 'menu__main--item-link') and (
+            translate(@title, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')=translate('${subCategory}', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz') 
+            or 
+            .//div[contains(@class, 'menu__main--item-link-text') and normalize-space(text())='${subCategory}']
+        )]`;
+        await this.context.locator(subMenuLocator).first().waitFor({state: 'visible'});
+        await this.context.hover(subMenuLocator);
+        await this.waitSecond(1);
+        
+        // Alt-alt kategoriye tıkla - daha spesifik bir seçici kullanıyoruz
+        const subSubMenuLocator = `//a[@href='/${mainCategory.toLowerCase()}-t-shirt' and contains(@class, 'menu__main--item-link') and .//div[text()='${subSubCategory}']]`;
+        await this.context.locator(subSubMenuLocator).first().waitFor({state: 'visible'});
+        await this._click(subSubMenuLocator);
+        
+        await this.context.waitForLoadState('networkidle');
+    }
+    async navigateToSubSubSubCategory(mainCategory, subSubCategory) {
+        await this.waitForLoadingMask();
+        
+        // Ana kategori menüsünün üzerine gel
+        const mainMenuLocator = `//a[contains(@class, 'menu__main--item-link-1') and normalize-space(.)='${mainCategory}']`;
+        await this.context.locator(mainMenuLocator).first().waitFor({state: 'visible'});
+        await this.context.hover(mainMenuLocator);
+        await this.waitSecond(1);
+        
+        // Alt kategorinin href'ini belirle
+        let href = '';
+        const categoryPrefix = mainCategory.toLowerCase().replace('ı', 'i').replace('ğ', 'g').replace('ü', 'u').replace('ş', 's').replace('ö', 'o').replace('ç', 'c');
+        
+        // Erkek kategorileri için href eşleştirmeleri
+        if (categoryPrefix === 'erkek') {
+            switch(subSubCategory) {
+                case 'Basic Giyim': href = '/erkek/basics'; break;
+                case 'Ceket ve Yelek': href = '/erkek-yelek?filtre=kategori:ceket'; break;
+                case 'Eşofman Altı': href = '/erkek-esofman-alti'; break;
+                case 'Gömlek': href = '/erkek-gomlek'; break;
+                case 'Kazak': href = '/erkek-kazak'; break;
+                case 'Jean Pantolon': href = '/erkek-jean-pantolon'; break;
+                case 'Pantolon': href = '/erkek-pantolon'; break;
+                case 'Polo Tişört': href = '/erkek-polo-t-shirt'; break;
+                case 'Sweatshirt': href = '/erkek-sweatshirt'; break;
+                case 'Şort & Bermuda': href = '/erkek-sort?filtre=kategori:bermuda'; break;
+                case 'Tişört': href = '/erkek-t-shirt'; break;
+                default: href = `/${categoryPrefix}-${subSubCategory.toLowerCase()}`; break;
+            }
+        }
+        // Kadın kategorileri için href eşleştirmeleri
+        else if (categoryPrefix === 'kadin') {
+            switch(subSubCategory) {
+                case 'Atlet': href = '/kadin-atlet'; break;
+                case 'Bluz': href = '/kadin-bluz'; break;
+                case 'Ceket': href = '/kadin-ceket'; break;
+                case 'Elbise': href = '/kadin-elbise'; break;
+                case 'Eşofman Altı': href = '/kadin-esofman-alti'; break;
+                case 'Etek': href = '/kadin-etek'; break;
+                case 'Gömlek': href = '/kadin-gomlek'; break;
+                case 'Hırka': href = '/kadin-hirka'; break;
+                case 'Jean Pantolon': href = '/kadin-jean-pantolon'; break;
+                case 'Kazak': href = '/kadin-kazak'; break;
+                case 'Mont ve Kaban': href = '/kadin-mont?filtre=kategori:kaban-parka'; break;
+                case 'Pantolon': href = '/kadin-pantolon'; break;
+                case 'Sweatshirt': href = '/kadin-sweatshirt'; break;
+                case 'Tayt': href = '/kadin-tayt'; break;
+                case 'Tişört': href = '/kadin-t-shirt'; break;
+                case 'Trençkot & Yağmurluk': href = '/kadin-trenckot?filtre=kategori:yagmurluk'; break;
+                case 'Tunik': href = '/kadin-tunik'; break;
+                case 'Yelek & Süveter': href = '/kadin-yelek?filtre=kategori:suveter'; break;
+                default: href = `/${categoryPrefix}-${subSubCategory.toLowerCase()}`; break;
+            }
+        }
+        
+        // Alt-alt kategoriye tıkla
+        const subSubMenuLocator = `//a[@href='${href}' and contains(@class, 'menu__main--item-link') and .//div[contains(@class, 'menu__main--item-link-text') and normalize-space(text())='${subSubCategory}']]`;
+        await this.context.locator(subSubMenuLocator).first().waitFor({state: 'visible'});
+        await this._click(subSubMenuLocator);
+    }
+
+    async selectAndSaveProduct(selection) {
+        await this.waitForLoadingMask();
+        
+        // Daha spesifik ürün kartı seçici
+        const productCardSelector = "//div[@class='catalog-products__item catalog-products__item--single col-6 col-lg-3 data-pushed']";
+        
+        // Sayfanın yüklenmesini ve ürünlerin görünür olmasını bekle
+        await this.context.locator(productCardSelector).first().waitFor({ 
+            state: 'visible',
+            timeout: 10000 
+        });
+
+        let productElement;
+        if (selection === 'ilk urune') {
+            productElement = await this.context.locator(productCardSelector).first();
+        } else if (selection === 'herhangi bir urune') {
+            const products = await this.context.locator(productCardSelector).all();
+            const randomIndex = Math.floor(Math.random() * products.length);
+            productElement = products[randomIndex];
+        }
+
+        // Ürün başlığını bulmak için daha spesifik bir seçici
+        const productNameElement = await productElement.locator('.product-card__title--name');
+        const productName = await productNameElement.textContent();
+        
+        // Temp data'ya kaydet
+        await CommonUtil.writeTempData('urun_adi', productName);
+        
+        console.log(`Seçilen ürün: ${productName}`);
+
+        // Ürüne tıkla
+        await productElement.click();
+        
+        await this.waitForLoadingMask();
+        return productName;
+    }
+
+    async selectProduct(selection) {
+        await this.waitForLoadingMask();
+        
+        // Ürün kartı seçicisi
+        const productCardSelector = "//div[@class='catalog-products__item catalog-products__item--single col-6 col-lg-3 data-pushed']";
+        
+        // Sayfanın yüklenmesini ve ürünlerin görünür olmasını bekle
+        await this.context.locator(productCardSelector).first().waitFor({ 
+            state: 'visible',
+            timeout: 10000 
+        });
+
+        let productElement;
+        if (selection === 'ilk urune') {
+            productElement = await this.context.locator(productCardSelector).first();
+        } else if (selection === 'herhangi bir urune') {
+            const products = await this.context.locator(productCardSelector).all();
+            const randomIndex = Math.floor(Math.random() * products.length);
+            productElement = products[randomIndex];
+        }
+
+        // Ürüne tıkla
+        await productElement.click();
+        
+        await this.waitForLoadingMask();
+    }
+
+    async navigateToStoktaBulunmayanUrun() {
+        await this.waitForLoadingMask();
+        await this.context.goto('https://www.defacto.com.tr/regular-fit-bisiklet-yaka-kazak-3113666');
+        await this.waitForLoadingMask();
+    }
 }
 
 module.exports = new CommonActions()

@@ -3,6 +3,7 @@ const CommonActions = require('../pages/CommonActions')
 
 
 
+
 Then('{string} butonuna tikla ve acilan sekmeye gec', async (button) => {
     await CommonActions.clickButtonAndSetContextToNewTab(button)
 })
@@ -528,6 +529,34 @@ Then('{string} elementi uzerine imleç getirilir', async (xpathKey) => {
 
 Then('{string} alaninin text degerinin {string} oldugu kontrol edilir', async (jsonKey, expectedText) => {
     await CommonActions.checkElementText(jsonKey, expectedText);
+});
+
+Then('{string} elementine tikla ve ismini {string} olarak kaydet', async (element, key) => {
+    await CommonActions.clickElementAndSaveName(element, key)
+})
+
+When('{string} menusunden {string} kategorisine gidilir', async function (mainCategory, subCategory) {
+    await CommonActions.navigateToSubCategory(mainCategory, subCategory);
+});
+
+When('{string} menusunden {string} ve sonra {string} kategorisine gidilir', async function (mainCategory, subCategory, subSubCategory) {
+    await CommonActions.navigateToSubSubCategory(mainCategory, subCategory, subSubCategory);
+}); 
+
+When('{string} menusunden {string} alt kategorisine gidilir', async function (mainCategory,subSubCategory) {
+    await CommonActions.navigateToSubSubSubCategory(mainCategory,subSubCategory);
+}); 
+
+Then('Sayfadaki {string} tikla ve ismini {string} olarak kaydet', async function (selection, key) {
+    await CommonActions.selectAndSaveProduct(selection);
+});
+
+Then('Sayfadaki {string} tiklanir', async function (selection) {
+    await CommonActions.selectProduct(selection);
+});
+
+When('Stokta olmayan bir urune gidilir', async function () {
+    await CommonActions.navigateToStoktaBulunmayanUrun();
 });
 
 

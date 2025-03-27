@@ -146,6 +146,7 @@ class homePage {
         ANASAYFA_HEADER_ERKEK_MENU:"//header/div[2]/nav/ul[1]/li[2]/a",  
         ANASAYFA_HEADER_MENU_ERKEK_GIYIM:"//header/div[2]/nav/ul[1]/li[2]/div/div/div[1]/ul/li[1]/a",
         ANASAYFA_HEADER_ERKEK_PANTOLON:"//header/div[2]/nav/ul[1]/li[2]/div/div/div[2]/ul/li[35]/a/div[2]",
+        ANASAYFA_HEADER_ERKEK_TISORT:"//a[@href='/erkek-t-shirt' and contains(@class, 'menu__main--item-link') and .//div[text()='Tişört']]",
        
         HEADER_KATEGORILER:"//header/div[2]/nav",
     

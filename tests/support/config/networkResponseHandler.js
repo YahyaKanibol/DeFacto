@@ -24,50 +24,10 @@ async function handleResponse(response, stepId, stepName) {
       }
     }
 
-    // Ensure mevcutHatalar is always an array
-    let mevcutHatalar = await CommonUtil.readTempData('responseHatalari');
-
-    // Ensure mevcutHatalar is an array
-    if (!Array.isArray(mevcutHatalar)) {
-      mevcutHatalar = [];
-    }
-
-    // Hata kontrolü için benzersiz bir anahtar oluştur
-    const errorKey = JSON.stringify({
-      stepId,
-      stepName,
-      status,
-      url,
-      exceptionMessage: responseBody?.exception?.message
-    });
-
-    // Daha önce aynı hatanın kaydedilip kaydedilmediğini kontrol et
-    const errorExists = mevcutHatalar.some(hata => 
-      JSON.stringify({
-        stepId: hata.stepId,
-        stepName: hata.stepName,
-        status: hata.status,
-        url: hata.url,
-        exceptionMessage: hata.responseBody?.exception?.message
-      }) === errorKey
-    );
-
-    // Hata daha önce kaydedilmediyse ekle
-    if (!errorExists && ((responseBody && responseBody.hasOwnProperty('exception')) || status >= 400)) {
+    // Sadece konsola yazdırma işlemi yapılacak, kayıt işlemi yapılmayacak
+    if ((responseBody && responseBody.hasOwnProperty('exception')) || status >= 400) {
       console.log(chalk.red(`Hata: İstek URL'si: ${url}`))
       console.log(chalk.redBright(`Hata: Response Body: ${JSON.stringify(responseBody)}`))
-      console.log(mevcutHatalar)
-      mevcutHatalar.push({
-        stepId: stepId,
-        stepName: stepName,
-        status: status,
-        url: url,
-        responseBody: responseBody
-      });
-      console.log(mevcutHatalar)
-
-      // Hatalar listesini güncelle
-      await CommonUtil.writeTempData('responseHatalari', mevcutHatalar);
     }
   }
 }

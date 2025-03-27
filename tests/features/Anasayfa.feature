@@ -269,15 +269,7 @@ And "POPULER_SORULAR_LISTE_DIV" elementinin gorunur oldugu kontrol edilir
   And "KURUMSAL_SATIS_ILETISIM_FORMU_FIRMAAD" alanina "<firmaad>" yazilir
   And "KURUMSAL_SATIS_ILETISIM_FORMU_DEPARTMAN" alanina "<departman>" yazilir
   And "KURUMSAL_SATIS_ILETISIM_FORMU_MESAJ" alanina "<mesaj>" yazilir
-    #bu alanda yazılan değerler text degeri olarak gorulmedigi için kontrol yapılamadı
-    #########-----------------------------------############
-#And "test" textinin gorunur oldugu kontrol edilir
- # And "testsoyad" textinin gorunur oldugu kontrol edilir
- # And "test@test.com" textinin gorunur oldugu kontrol edilir
- # And "5555555555" textinin gorunur oldugu kontrol edilir
- # And "firmaad" textinin gorunur oldugu kontrol edilir
- # And "departman" textinin gorunur oldugu kontrol edilir
- #And "mesaj" textinin gorunur oldugu kontrol edilir
+  
 
   Examples:
       | ad   |soyad     |eposta       |telefon      |firmaad |departman |mesaj|

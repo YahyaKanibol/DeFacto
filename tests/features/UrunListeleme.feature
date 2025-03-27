@@ -98,14 +98,10 @@ Feature: DeFacto Prod Testleri - Urun Listeleme
   Scenario: (TC-0051) Secili filtreler kaldirip temizleme [GUEST][URUN_LISTELEME]
     Given Ana sayfa acilir
     Then "KVKK_TUMUNE_IZIN_VER" elementine tiklanir
-    #And 1 saniye beklenir
     And "ANASAYFA_HEADER_ERKEK_MENU" elementi uzerine imleç getirilir
- #   And 1 saniye beklenir
     And "ANASAYFA_HEADER_MENU_ERKEK_GIYIM" elementine tiklanir
-    #And 1 saniye beklenir
     And "ANASAYFA_HEADER_ERKEK_PANTOLON" elementine tiklanir
     And "COK_SATANLAR" elementine tiklanir
-   # And 1 saniye beklenir
     And "COK_SATANLAR" elementine tiklanir
     And 1 saniye beklenir
     And "FILTRELER_BEDEN_S" elementine tiklanir
