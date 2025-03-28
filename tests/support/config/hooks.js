@@ -54,14 +54,11 @@ Before(async function ({ pickle, gherkinDocument }) {
     const featureName = gherkinDocument.feature.name
     console.log(featureName)
 
-    // Regex ile sayı değerini ayıklama
     const numberMatch = featureName.match(/(\d+)/)
-    featureNumber = numberMatch ? numberMatch[0] : 'no-number' // Eğer sayı yoksa 'no-number' atanır
+    featureNumber = numberMatch ? numberMatch[0] : 'no-number'
 
-    // const testName = `${pickle.name}`; // Test ismi ve zaman damgası ile birlikte isim oluştur
-    global.testName = featureName // Global bir değişken olarak atama
+    global.testName = featureName
     await CommonUtil.createTempFile(featureName)
-    CommonUtil.writeTempData('responseHatalari', [])
 
     Log.testBegin(`${pickle.name}`)
 

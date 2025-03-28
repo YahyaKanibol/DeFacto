@@ -38,6 +38,8 @@ class basketPage{
         INDIRIM_KODU_ALANI:"//div[@id='sale-points-form']/div/div/input",
         INDIRIM_KODU_KULLAN:"#salePointsBtn",
         INDIRIM_KODU_BILGILENDIRME:"//div[@id='sale-points-form']/div/div/div"
+        URUN_BEDEN:"(//div[contains(@class, 'product-size-selector__buttons')])[1]"
+
 
     }
    

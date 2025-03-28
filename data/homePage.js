@@ -147,6 +147,8 @@ class homePage {
         ANASAYFA_HEADER_ERKEK_MENU:"//header/div[2]/nav/ul[1]/li[2]/a",  
         ANASAYFA_HEADER_MENU_ERKEK_GIYIM:"//header/div[2]/nav/ul[1]/li[2]/div/div/div[1]/ul/li[1]/a",
         ANASAYFA_HEADER_ERKEK_PANTOLON:"//header/div[2]/nav/ul[1]/li[2]/div/div/div[2]/ul/li[35]/a/div[2]",
+
+        ANASAYFA_HEADER_ERKEK_TISORT:"//a[@href='/erkek-t-shirt' and contains(@class, 'menu__main--item-link') and .//div[text()='Tişört']]",
         ANASAYFA_GIRIS_YAP:"//header/div[2]/div[3]/div[1]/a[2]",
         GIRIS_YAP_BUTON:"//header/div[2]/div[3]/div[1]/div/button",
         LOGIN_PAGE_EMAIL:"#LoginModel_Email",
