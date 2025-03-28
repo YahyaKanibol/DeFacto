@@ -28,6 +28,7 @@
     "@cucumber/pretty-formatter": "^1.0.0",
     "@playwright/test": "^1.42.1",
     "@types/node": "^20.11.17",
+    "@wdio/cli": "^9.12.1",
     "allure-commandline": "^2.25.0",
     "allure-cucumberjs": "^2.10.0",
     "cross-env": "^7.0.3",

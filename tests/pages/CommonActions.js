@@ -7,6 +7,9 @@ const path = require('path')
 let lastThreeElements = []
 
 class CommonActions {
+    constructor() {
+        this.storedText = {}; // Ürün adını saklamak için
+    }
     async setContext(projectName) {
         switch (projectName) {
             case 'Normal':
@@ -1516,6 +1519,7 @@ class CommonActions {
         console.log(`✅ "${jsonKey}" elementi doğrulandı. İçerik: "${actualText}"`);
     }
     
+
     async clickElementAndSaveName(path, key) {
         await this.waitForLoadingMask()
         const element = await this.getXpath(path)
@@ -1675,6 +1679,148 @@ class CommonActions {
         
         await this.waitForLoadingMask();
         return productName;
+
+    async scrollUp(scrollAmount = 300) {
+        await this.waitForLoadingMask(); // Yüklenme maskesinin kalkmasını bekle
+    
+        await this.context.evaluate((amount) => {
+            window.scrollBy(0, -amount); // Sayfayı yukarı kaydır
+        }, scrollAmount);
+    
+        console.log(`Sayfa ${scrollAmount} piksel yukarı kaydırıldı.`);
+    }
+     async scrollDown(scrollCount = 3, scrollAmount = 300) {
+        await this.waitForLoadingMask(); // Sayfa yüklenme maskesinin kalkmasını bekle
+
+        for (let i = 0; i < scrollCount; i++) {
+            await this.context.evaluate((amount) => {
+                window.scrollBy(0, amount); // Sayfayı aşağı kaydır
+            }, scrollAmount);
+
+            console.log(`📜 Sayfa ${scrollAmount} piksel aşağı kaydırıldı. (${i + 1}/${scrollCount})`);
+            await this.context.waitForTimeout(500); // Her kaydırmadan sonra bekleme
+        }
+    }
+    async scrollUpCount(scrollCount=3,scrollAmount = 300) {
+        await this.waitForLoadingMask(); // Yüklenme maskesinin kalkmasını bekle
+
+    for (let i = 0;i<scrollCount;i++){
+        await this.context.evaluate((amount) => {
+            window.scrollBy(0, -amount); // Sayfayı yukarı kaydır
+        }, scrollAmount);
+    }
+    
+        console.log(`Sayfa ${scrollAmount} piksel yukarı kaydırıldı.`);
+    }
+    
+    async getTextByXpath(xpath) {
+        await this.waitForLoadingMask(); // Yüklenme maskesini bekle
+        const element = await this.context.locator(xpath);
+        if (await element.isVisible()) {
+            return await element.textContent();
+        } else {
+            throw new Error(`Element bulunamadı: ${xpath}`);
+        }
+    }
+
+    async getCartPriceDetails() {
+        const onTutarXPath = "//div[@id='ContainerShoppingCart']/div/div[3]/div/div[1]/div[1]/div[1]/span[2]";
+        const kargoUcretiXPath = "//div[@id='ContainerShoppingCart']/div/div[3]/div/div[1]/div[1]/div[2]/span[2]";
+        const toplamTutarXPath = "//div[@id='ContainerShoppingCart']/div/div[3]/div/div[1]/div[1]/div[3]/div/span[2]";
+
+        const onTutarText = await this.getTextByXpath(onTutarXPath);
+        const kargoUcretiText = await this.getTextByXpath(kargoUcretiXPath);
+        const toplamTutarText = await this.getTextByXpath(toplamTutarXPath);
+
+        const onTutar = parseFloat(onTutarText.replace(/[^\d.]/g, '')) || 0;
+        const kargoUcreti = parseFloat(kargoUcretiText.replace(/[^\d.]/g, '')) || 0;
+        const toplamTutar = parseFloat(toplamTutarText.replace(/[^\d.]/g, '')) || 0;
+
+        console.log(`Ön Tutar: ${onTutar}, Kargo Ücreti: ${kargoUcreti}, Toplam Tutar: ${toplamTutar}`);
+
+        return { onTutar, kargoUcreti, toplamTutar };
+    }
+
+    async checkTotalAmount() {
+        const { onTutar, kargoUcreti, toplamTutar } = await this.getCartPriceDetails();
+
+        if (onTutar + kargoUcreti === toplamTutar) {
+            console.log("Toplam ücret doğru hesaplandı.");
+        } else {
+            throw new Error(`Toplam ücret hatalı! Beklenen: ${onTutar + kargoUcreti}, Bulunan: ${toplamTutar}`);
+        }
+    }
+ 
+    async removeProductAndVerify() {
+        // Sayfada yüklenme maskesini bekle
+        await this.waitForLoadingMask();
+
+        // 1 saniye bekle
+        await this.context.waitForTimeout(1000);
+
+        const productXpath = "//div[@id='ContainerShoppingCart']/div/div[2]/div/div/div/div[1]/div[3]/div[1]/a[1]";
+        const cartProductElement = this.context.locator(productXpath);
+        await expect(cartProductElement).toBeVisible({ timeout: 5000 });
+        let cartProductName = await cartProductElement.textContent();
+        
+        // Bütün harfleri küçük yap
+        cartProductName = cartProductName.toUpperCase();    
+        cartProductName = cartProductName.replace(/I/g, 'İ');    
+        cartProductName = cartProductName.replace(/\s+/g, '');
+        
+    
+        // Ürün silme butonuna tıklama
+        const removeButtonXpath = "//div[@id='ContainerShoppingCart']/div/div[2]/div/div[1]/div/div[1]/div[3]/div[4]/div/a[1]/span";
+        const removeButton = this.context.locator(removeButtonXpath);
+        await expect(removeButton).toBeVisible({ timeout: 5000 });
+        await removeButton.click();
+        console.log("🗑️ Ürün kaldırma butonuna tıklandı.");
+
+        // "Bu işlemle ürün sepetinizden kaldırılacaktır" mesajını doğrula
+        const confirmationTextXpath = "//div[@id='productDeleteModal']/div/div[2]/div[1]/span";
+        const confirmationText = this.context.locator(confirmationTextXpath);
+        await expect(confirmationText).toBeVisible({ timeout: 5000 });
+        console.log("✅ Silme onay mesajı görüntülendi.");
+
+        // Onay butonuna tıklama
+        const confirmButtonXpath = "//div[@id='productDeleteModal']/div/div[2]/div[2]/button[1]";
+        const confirmButton = this.context.locator(confirmButtonXpath);
+        await expect(confirmButton).toBeVisible({ timeout: 5000 });
+        await confirmButton.click();
+        console.log("✔️ Ürün silme işlemi onaylandı.");
+
+        // "Sepetinizde ürün yok" mesajını doğrula
+        const emptyCartTextXpath = "//div[contains(text(), 'Sepetinizde ürün yok')]";
+        const emptyCartText = this.context.locator(emptyCartTextXpath);
+        await expect(emptyCartText).toBeVisible({ timeout: 5000 });
+        console.log("✅ Sepetinizde ürün yok mesajı görüntülendi.");
+
+        // Favoriler butonuna tıklama
+        const favoriteButtonXpath = "//header/div[2]/div[3]/div[3]/a";
+        const favoriteButton = this.context.locator(favoriteButtonXpath);
+        await expect(favoriteButton).toBeVisible({ timeout: 5000 });
+        await favoriteButton.click();
+        console.log("🛍️ Favoriler simgesine tıklandı.");
+
+        const detailProductXpath = "//main/div/div/div[2]/div[2]/div/div[2]/div[2]/div[2]/div/div/div/div[2]/div/div/h3/a";
+const detailProductElement = this.context.locator(detailProductXpath);
+await expect(detailProductElement).toBeVisible({ timeout: 5000 });
+let detailProductName = await detailProductElement.textContent();
+detailProductName = detailProductName.replace(/\s+/g, '');
+detailProductName = detailProductName.replace(/I/g, 'İ');    
+
+
+
+
+
+
+        // Sepetteki ürün ile detay sayfasındaki ürün ismini karşılaştır
+        if (detailProductName !== cartProductName) {
+            throw new Error(`❌ Beklenen ürün: ${cartProductName}, ancak detay sayfasında: ${detailProductName}`);
+        }
+
+        console.log(`✅ Ürün ismi detay sayfasında doğrulandı: ${detailProductName}`);
+
     }
 
     async selectProduct(selection) {

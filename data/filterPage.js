@@ -19,7 +19,21 @@ class filterPage{
         COK_SATANLAR:"//main/div/div[3]/div[2]/ul/li[2]/a",
         FILTRELER_BEDEN_S:"//div[@id='catalog-filter__nav']/ul/li[2]/ul/li[2]/ul/li[1]/div/label",
         FILTRELER_SECILENLER_HEADER_1:"//div[@id='catalog-meta-container']/div[1]/a[1]",
-        FILTRELER_SECILENLER_HEADER_2:"//div[@id='catalog-meta-container']/div[1]/a[2]"
+        FILTRELER_SECILENLER_HEADER_2:"//div[@id='catalog-meta-container']/div[1]/a[2]",
+        EN_COK_DEGERLENDIRILENLER:"//main/div/div[3]/div[2]/ul/li[3]/a",
+        EN_FAVORILER:"//main/div/div[3]/div[2]/ul/li[4]/a",
+        HIZLI_FILTRELEME_SIRALAMA_SONUC:"//div[@id='catalog-meta-container']/div[2]/div[2]/div[1]/div/div/div/span[2]",
+        ERKEK_GIYIM_HEPSINI_GOSTER:"//header/div[2]/nav/ul[1]/li[2]/div/div/div[2]/ul/li[4]/a",
+        COCUK_GIYIM:"//header/div[2]/nav/ul[1]/li[3]/a",
+        COCUK_GIYIM_HEPSINI_GOSTER:"//header/div[2]/nav/ul[1]/li[3]/div/div/div[2]/ul/li[1]/a/div[2]",
+        KIZ_COCUK:"//header/div[2]/nav/ul[1]/li[3]/div/div/div[1]/ul/li[1]/a",
+        FILTRELE_URUN_SAYISI:"//div[@id='catalog-meta-container']/div/div[1]",
+        IKILI_GOSTERIM:"//div[@id='catalog-meta-container']/div/div[2]/div[2]/div[1]/div/button[1]",
+        DORTLU_GOSTERIM:"//div[@id='catalog-meta-container']/div/div[2]/div[2]/div[1]/div/button[2]",
+        PLP_ASAGIDAN_HERHANGI_BIR_URUN:"#product-fill > div > div:nth-child(10) > div",
+        PLP_DAHA_FAZLA_URUN_GOSTER:"#product-container > div.load-more > button"
+
+
         
         
         
