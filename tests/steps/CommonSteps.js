@@ -528,7 +528,31 @@ Then('{string} elementi uzerine imleç getirilir', async (xpathKey) => {
 
 Then('{string} alaninin text degerinin {string} oldugu kontrol edilir', async (jsonKey, expectedText) => {
     await CommonActions.checkElementText(jsonKey, expectedText);
-});
+})
+
+
+Then('Sayfa yukarı kaydırılır', async () => {
+    await CommonActions.scrollUp(300); // 300 piksel yukarı kaydır
+})
+
+Then('{int} kez aşağı kaydırılır', async (scrollCount) => {
+    await CommonActions.scrollDown(scrollCount);
+})
+Then('{int} kez yukari kaydırılır', async (scrollCount) => {
+    await CommonActions.scrollUpCount(scrollCount);
+})
+Then("Toplam ucretin dogru denk gelip gelmedigine bakilir", async () => {
+    await CommonActions.checkTotalAmount();
+})
+Then('Sepetteki urun silinir ve detay sayfasinda dogrulanir', async function () {
+    await CommonActions.removeProductAndVerify();
+})
+
+
+
+
+
+
 
 
 
